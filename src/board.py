@@ -3,13 +3,33 @@ from square import *
 from piece import *
 from move import Move
 class Board:
+    
     def __init__(self):
         self.squares = [[0, 0, 0, 0, 0, 0, 0, 0] for col in range(COLS)]
-
+        self.last_move = None
         self._create() 
         self._add_pieces('white')
         self._add_pieces('black')  
 
+    def move(self, piece, move):
+        initial = move.initial
+        final = move.final
+
+        # console board move update
+        self.squares[initial.row][initial.col].piece = None
+        self.squares[final.row][final.col].piece = piece
+
+        # move
+        piece.moved = True
+
+        # clear valid moves
+        piece.clear_moves()
+
+        #set last move
+        self.last_move = move
+
+    def valid_move(self, piece, move):
+        return (move in piece.moves)
 
     def calc_moves(self, piece, row, col):
         '''
@@ -196,12 +216,10 @@ class Board:
         #bishops
         self.squares[row_other][2] = Square(row_other, 2, Bishop(color))
         self.squares[row_other][5] = Square(row_other, 5, Bishop(color))
-        self.squares[3][5] = Square(3, 5, Bishop(color))
 
         #rooks
         self.squares[row_other][0] = Square(row_other, 0, Rook(color))
         self.squares[row_other][7] = Square(row_other, 7, Rook(color))
-        self.squares[2][5] = Square(2, 5, Rook(color))
 
         #Queen
         self.squares[row_other][3] = Square(row_other, 3, Queen(color))

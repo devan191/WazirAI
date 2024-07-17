@@ -32,14 +32,13 @@ class Dragger:
 
     def save_initial(self,pos):
         self.initial_row = pos[1]//SQSIZE
-        self.inital_col = pos[0]//SQSIZE
+        self.initial_col = pos[0]//SQSIZE
 
     def drag_piece(self,piece):
         self.piece = piece
         self.dragging = True
 
     def undrag_piece(self):
-        self.piece.set_texture(size=80)
         self.piece = None
         self.dragging = False
         
