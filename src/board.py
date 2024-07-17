@@ -7,6 +7,8 @@ class Board:
     def __init__(self):
         self.squares = [[0, 0, 0, 0, 0, 0, 0, 0] for col in range(COLS)]
         self.last_move = None
+        self.next_player = 'white'
+        self.hovered_sqr = None
         self._create() 
         self._add_pieces('white')
         self._add_pieces('black')  
@@ -61,39 +63,39 @@ class Board:
                         piece.add_move(move)
 
         def pawn_moves():
-            #steps
+            
+            # Steps: 1 step if the pawn has moved, otherwise 2 steps from the initial position
             steps = 1 if piece.moved else 2
 
-            #vertical moves
-            start = row + piece.dir
-            end = row + (piece.dir * (1+steps))
-            for possible_move_row in range(start, end, piece.dir):
-                if Square.in_range(possible_move_row):
+            # Vertical moves
+            for step in range(1, steps + 1):
+                possible_move_row = row + piece.dir * step
+                if Square.in_range(possible_move_row):  # Check if row is within board range
                     if self.squares[possible_move_row][col].isempty():
-                        # create initial and final move squares
+                        # Create initial and final move squares
                         initial = Square(row, col)
                         final = Square(possible_move_row, col)
-                        #create a new move
+                        # Create a new move
                         move = Move(initial, final)
-                        #append new move
+                        # Append new move
                         piece.add_move(move)
-                    #this means we're blocked
-                    else: break
-                #not in range
-                else: break
+                    else:
+                        break  # Blocked by another piece, stop checking further
+                else:
+                    break  # Row is out of range, stop checking further
 
-            #diagonal moves
+            # Diagonal moves for capturing
             possible_move_row = row + piece.dir
-            possible_move_cols = [col-1,col+1]
+            possible_move_cols = [col - 1, col + 1]
             for possible_move_col in possible_move_cols:
-                if Square.in_range(possible_move_row,possible_move_col):
+                if Square.in_range(possible_move_row, possible_move_col):  # Check if both row and column are within board range
                     if self.squares[possible_move_row][possible_move_col].has_enemy_piece(piece.color):
-                        # create initial and final move squares
-                        initial = Square(row,col)
-                        final = Square(possible_move_row,possible_move_col)
-                        #creating a new move
+                        # Create initial and final move squares
+                        initial = Square(row, col)
+                        final = Square(possible_move_row, possible_move_col)
+                        # Create a new move
                         move = Move(initial, final)
-                        #appending the move
+                        # Append the move
                         piece.add_move(move)
 
             #en pessiant moves
@@ -203,6 +205,7 @@ class Board:
                 self.squares[row][col] = Square(row,col)
         
     def _add_pieces(self,color):
+
         row_pawn, row_other = (1,0) if color == 'black' else (6,7)
 
         # pawns
@@ -226,3 +229,9 @@ class Board:
 
         #King
         self.squares[row_other][4] = Square(row_other, 4, King(color))
+    
+    def next_turn(self):
+        self.next_player = 'white' if self.next_player == 'black' else 'black'
+
+    def set_hover(self, row, col):
+        self.hovered_sqr = self.squares[row][col]

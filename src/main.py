@@ -5,14 +5,16 @@ from const import *
 from game import Game
 from square import Square
 from move import Move
+
 class Main:
 
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH,HEIGHT))
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Chess")
-
         self.game = Game()
+        self.clock = pygame.time.Clock()
+        self.is_update_needed = True  # Initialize the update needed flag
 
     def mainloop(self):
         screen = self.screen
@@ -21,77 +23,100 @@ class Main:
         board = self.game.board
 
         while True:
-            #show methods
-            game.show_bg(screen)
-            game.show_moves(screen)
-            game.show_pieces(screen)
+            self.handle_events()
 
-            if dragger.dragging:
-                dragger.update_blit(screen)
+            # Only update the game display if something changes
+            if dragger.dragging or self.is_update_needed:
+                self.display_game(screen)
 
-            for event in pygame.event.get():
+            # Cap the frame rate at 60 FPS
+            self.clock.tick(60)
+            pygame.display.update()
 
-                #click
-                if event.type == pygame.MOUSEBUTTONDOWN:
+    
+    def handle_events(self):
+        dragger = self.game.dragger
+        board = self.game.board
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+                
+            #key press
+            if event.type == pygame.KEYDOWN:
+                #changing themes
+                if event.key == pygame.K_t:
+                    self.game.change_theme()
+                    self.is_update_needed = True
+                    
+            #dragging/ hovering
+            if event.type == pygame.MOUSEMOTION:
+                motion_row = event.pos[1] // SQSIZE
+                motion_col = event.pos[0] // SQSIZE
+                if(motion_row < 0): motion_row = 0
+                if(motion_row > 7): motion_row = 7
+                if(motion_col < 0): motion_col = 0
+                if(motion_col > 7): motion_col = 7
+                board.set_hover(motion_row, motion_col)
+                self.is_update_needed = True
+
+                if dragger.dragging:
                     dragger.update_mouse(event.pos)
-                    #print(event.pos)
+                    self.is_update_needed = True
 
-                    #event.pos gives coordinates of wherever we are on screen
-                    clicked_row = dragger.mouseY // SQSIZE
-                    clicked_col = dragger.mouseX // SQSIZE
-                    #print(clicked_col,clicked_row)
+            #click
+            if event.type == pygame.MOUSEBUTTONDOWN and self.game.flag:
+                dragger.update_mouse(event.pos)
+                clicked_row = dragger.mouseY // SQSIZE
+                clicked_col = dragger.mouseX // SQSIZE
 
-                    # if clicked square has a piece
-                    if board.squares[clicked_row][clicked_col].has_piece():
-                        piece = board.squares[clicked_row][clicked_col].piece
+                if board.squares[clicked_row][clicked_col].has_piece():
+                    
+                    piece = board.squares[clicked_row][clicked_col].piece
+                    #valid piece color ?
+                    if piece.color == board.next_player:
                         board.calc_moves(piece, clicked_row, clicked_col)
                         dragger.save_initial(event.pos)
                         dragger.drag_piece(piece)
-                        #show methods
-                        game.show_bg(screen)
-                        game.show_moves(screen)
-                        game.show_pieces(screen)
+                        self.is_update_needed = True
+                        self.game.flag = False
 
-                # dragging
-                elif event.type == pygame.MOUSEMOTION:
-                    if dragger.dragging:
-                        dragger.update_mouse(event.pos)
-                        #show methods
-                        game.show_bg(screen)
-                        game.show_moves(screen)
-                        game.show_pieces(screen)
-                        dragger.update_blit(screen)
+            #click release
+            if event.type == pygame.MOUSEBUTTONUP and dragger.dragging:
+                
+                dragger.update_mouse(event.pos)
+                released_row = dragger.mouseY // SQSIZE
+                released_col = dragger.mouseX // SQSIZE
 
-                # click release 
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    if dragger.dragging:
-                        dragger.update_mouse(event.pos)
-                        released_row = dragger.mouseY // SQSIZE
-                        released_col = dragger.mouseX // SQSIZE
+                initial = Square(dragger.initial_row, dragger.initial_col)
+                final = Square(released_row, released_col)
+                move = Move(initial, final)
 
-                        # Debugging statements
-                        print(f"Mouse released at: {event.pos}")
-                        print(f"Released position: Row {released_row}, Col {released_col}")
+                if board.valid_move(dragger.piece, move):
+                    captured = board.squares[released_row][released_col].has_piece()
 
-                        # Create possible move
-                        initial = Square(dragger.initial_row, dragger.initial_col)
-                        final = Square(released_row, released_col)
-                        move = Move(initial, final)
+                    board.move(dragger.piece, move)
+                    #sound
+                    self.game.play_sound(captured)
+                    #setting up next player's turn
+                    board.next_turn()
 
-                        # Check if valid move
-                        if board.valid_move(dragger.piece, move):
-                            print("Valid move detected")
-                            board.move(dragger.piece, move)
-                        else:
-                            print("Invalid move")
+                dragger.piece.clear_moves()    # this was the nasty bug... moves of piece were not clearing if it was invalid moves
+                dragger.undrag_piece()
+                self.game.flag = True
+                self.is_update_needed = True
 
-                    dragger.undrag_piece()
-                        
-                elif event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+    def display_game(self, screen):
+        self.game.show_bg(screen)
+        self.game.show_last_move(screen)
+        self.game.show_moves(screen)
+        self.game.show_pieces(screen)
+        self.game.show_hover(screen)
+        if self.game.dragger.dragging:
+            self.game.dragger.update_blit(screen) 
+        self.is_update_needed = False
 
-            pygame.display.update()
-
-main = Main()
-main.mainloop()
+if __name__ == "__main__":
+    main = Main()
+    main.mainloop()
