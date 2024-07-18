@@ -23,7 +23,7 @@ class Main:
         board = self.game.board
 
         while True:
-            self.handle_events()
+            self.handle_events(screen)
 
             # Only update the game display if something changes
             if dragger.dragging or self.is_update_needed:
@@ -34,7 +34,7 @@ class Main:
             pygame.display.update()
 
     
-    def handle_events(self):
+    def handle_events(self,screen):
         dragger = self.game.dragger
         board = self.game.board
 
@@ -49,6 +49,18 @@ class Main:
                 if event.key == pygame.K_t:
                     self.game.change_theme()
                     self.is_update_needed = True
+                
+                if event.key == pygame.K_r:
+                    board.reset()
+                    self.is_update_needed = True
+                
+                if event.key == pygame.K_b:
+                    if len(board.moves_log) == 1:
+                        board.reset()
+                        self.is_update_needed = True
+                    else:
+                        board.undo_move()
+                        self.is_update_needed = True
                     
             #dragging/ hovering
             if event.type == pygame.MOUSEMOTION:
@@ -93,7 +105,7 @@ class Main:
                 final = Square(released_row, released_col)
                 move = Move(initial, final)
 
-                if board.valid_move(dragger.piece, move):
+                if board.possible_move(dragger.piece, move):
                     captured = board.squares[released_row][released_col].has_piece()
 
                     board.move(dragger.piece, move)
@@ -102,7 +114,7 @@ class Main:
                     #setting up next player's turn
                     board.next_turn()
 
-                dragger.piece.clear_moves()    # this was the nasty bug... moves of piece were not clearing if it was invalid moves
+                dragger.piece.clear_moves()    # this was the nasty bug... moves of piece were not clearing if it was an invalid move
                 dragger.undrag_piece()
                 self.game.flag = True
                 self.is_update_needed = True

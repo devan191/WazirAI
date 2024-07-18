@@ -7,11 +7,14 @@ class Piece:
         self.color = color
         value_sign = 1 if color == 'white' else -1
         self.value = value * value_sign
-        self.moves = []
+        self.possible_moves = []
         self.moved = False
         self.texture = texture
         self.set_texture()
         self.texture_rect = texture_rect
+    
+    def __str__(self) -> str:
+        return self.name
 
     def set_texture(self,size=80):
         #img url
@@ -19,10 +22,10 @@ class Piece:
             f'assets/images/mimgs-{size}px/{self.color}_{self.name}.png'
         )
     def add_move(self, move):
-        self.moves.append(move)
+        self.possible_moves.append(move)
 
     def clear_moves(self):
-        self.moves = []
+        self.possible_moves = []
 
 class Pawn(Piece):
 

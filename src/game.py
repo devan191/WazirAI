@@ -16,6 +16,9 @@ class Game:
     
     # blit methods
 
+    def show_panel(self,surface):
+        pass
+
     def show_bg(self,surface):
         theme = self.config.theme 
 
@@ -58,7 +61,7 @@ class Game:
                     #all pieces except dragger piece
                     if piece is not self.dragger.piece:
                         
-                        img = pygame.image.load(piece.texture)
+                        img = pygame.image.load(piece.texture).convert_alpha()
                         img_center = col * SQSIZE + SQSIZE//2, row * SQSIZE + SQSIZE//2
                         piece.texture_rect = img.get_rect(center = img_center)
                         surface.blit(img, piece.texture_rect)
@@ -70,7 +73,7 @@ class Game:
             piece = self.dragger.piece
 
             # loop all the valid moves
-            for move in piece.moves:
+            for move in piece.possible_moves:
                 #color
                 color = theme.moves.light if (move.final.row + move.final.col)%2 == 0 else theme.moves.dark
                 #rect
@@ -81,6 +84,7 @@ class Game:
     def show_last_move(self, surface):
         theme = self.config.theme
         if self.board.last_move:
+    
             #a move consists of initial square and final square pos
             initial = self.board.last_move.initial
             final = self.board.last_move.final
@@ -110,4 +114,9 @@ class Game:
             self.config.capture_sound.play()
         else:
             self.config.move_sound.play()
+    
+    def reset(self):
+        self.__init__()
+    
+   
     

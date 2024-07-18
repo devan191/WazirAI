@@ -9,6 +9,9 @@ class Board:
         self.last_move = None
         self.next_player = 'white'
         self.hovered_sqr = None
+        self.moves_log = []
+        self.moved_piece_log = []
+        self.last_piece_captured = []
         self._create() 
         self._add_pieces('white')
         self._add_pieces('black')  
@@ -17,21 +20,28 @@ class Board:
         initial = move.initial
         final = move.final
 
+        if self.squares[final.row][final.col].isempty():
+            self.last_piece_captured.append(0)
+        else:
+            self.last_piece_captured.append(self.squares[final.row][final.col].piece)
+
         # console board move update
         self.squares[initial.row][initial.col].piece = None
         self.squares[final.row][final.col].piece = piece
 
         # move
         piece.moved = True
-
+        self.moves_log.append(move)
+        self.moved_piece_log.append(piece)
         # clear valid moves
         piece.clear_moves()
 
         #set last move
         self.last_move = move
 
-    def valid_move(self, piece, move):
-        return (move in piece.moves)
+    def possible_move(self, piece, move):
+        
+        return (move in piece.possible_moves)
 
     def calc_moves(self, piece, row, col):
         '''
@@ -235,3 +245,28 @@ class Board:
 
     def set_hover(self, row, col):
         self.hovered_sqr = self.squares[row][col]
+
+    def reset(self):
+        self.__init__()
+
+    def undo_move(self):
+        if len(self.moves_log) != 0:
+
+            current_move = self.moves_log.pop()
+            current_piece = self.moved_piece_log.pop()
+            last_capt_piece = self.last_piece_captured.pop()
+
+            if isinstance(current_piece,Pawn):
+                if current_piece not in self.moved_piece_log:
+                    current_piece.moved = False
+
+            initial = current_move.final
+            final = current_move.initial
+            move = Move(initial,final)
+
+            # console board move update
+            self.squares[initial.row][initial.col].piece = None if last_capt_piece==0 else last_capt_piece
+            self.squares[final.row][final.col].piece = current_piece
+
+            self.last_move = move
+            self.next_turn()
