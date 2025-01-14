@@ -14,8 +14,11 @@ class Piece:
         self.texture_rect = texture_rect
     
     def __str__(self) -> str:
-        return self.name
-
+        return f"{self.color} {self.name}"
+    
+    def __repr__(self) -> str:
+        return f"{self.color} {self.name}"
+    
     def set_texture(self,size=80):
         #img url
         self.texture = os.path.join(

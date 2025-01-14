@@ -12,12 +12,24 @@ class Game:
         self.board = Board()
         self.dragger = Dragger()
         self.config = Config()
-        self.flag = True
+        
     
     # blit methods
 
     def show_panel(self,surface):
-        pass
+        title_font = pygame.font.Font('assets/font/Pixeltype.ttf', 75)
+        text_font = pygame.font.SysFont('MONOSPACE',24, bold = True)
+        text1 = title_font.render('Welcome', False, 'White')
+        text2 = title_font.render('To', False, 'White')
+        text3 = title_font.render('PyChess!', False, 'White')
+        text4 = text_font.render('This is 2v2 player mode',True, 'Blue')
+        rect = (800, 0, 400, 800)
+        #blit
+        pygame.draw.rect(surface,'black', rect)
+        surface.blit(text1, (900,100))
+        surface.blit(text2, (950,150))
+        surface.blit(text3, (900,200))
+        surface.blit(text4, (850,300))
 
     def show_bg(self,surface):
         theme = self.config.theme 

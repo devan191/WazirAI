@@ -29,6 +29,7 @@ class Board:
         self.squares[initial.row][initial.col].piece = None
         self.squares[final.row][final.col].piece = piece
 
+        print("Moved",piece,"from",initial,"to",final)
         # move
         piece.moved = True
         self.moves_log.append(move)

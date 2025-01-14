@@ -25,9 +25,12 @@ class Config:
         self.theme = self.themes[self.idx]
 
     def _add_themes(self):
-        green = Theme('#EBECD0','#739552','#FAFA5E','#FAFA5E','#F4F589','#B3C544')
-        brown = Theme((235, 209, 166), (165, 117, 80), (245, 234, 100), (209, 185, 59),'#F4F589','#B3C544')
+        green = Theme('#EBECD0','#739552','#ffd591','#ffa459','#fa466a','#c4144f')
+        brown = Theme((235, 209, 166), (165, 117, 80),'#ff788a','#ffa459','#fa466a','#c4144f')
         blue = Theme((229, 228, 200), (60, 95, 135), (123, 187, 227), (43, 119, 191),'#F4F589','#B3C544')
         gray = Theme((120, 119, 118), (86, 85, 84), (99, 126, 143), (82, 102, 128),'#F4F589','#B3C544')
+        classic = Theme('#FFFFFF','#000000', (123, 187, 227), (43, 119, 191),'#F4F589','#B3C544')
+        tan = Theme('#FCE4B2','#D08B18','#F7D84A','#F7D84A', '#F4F589','#B3C544')
+        red = Theme('#F0D8BF','#BA5546', '#fff599', '#ffa459','#F4F589','#B3C544')
 
-        self.themes = [green, brown, blue, gray]
+        self.themes = [classic, green, brown, blue, gray, tan, red]

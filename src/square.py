@@ -1,11 +1,16 @@
-from const import ALPHACOLS
+from const import ALPHACOLS, ROWS
 class Square:
     
     def __init__(self, row, col, piece=None):
         self.row = row
         self.col = col
         self.piece = piece
-       
+    
+    def __str__(self) -> str:
+        return f"({ROWS - self.row},{self.get_alphacol(self.col)})"
+    
+    def __repr__(self) -> str:
+        return f"({ROWS - self.row},{self.get_alphacol(self.col)})"
 
     def __eq__(self, other):
         return self.row == other.row and self.col == other.col
